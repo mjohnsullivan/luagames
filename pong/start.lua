@@ -14,10 +14,14 @@ function start_draw()
             
     player_left_text = "Player 1 keys: 'q' - up, 'a' - down"
     player_right_text = "Player 2 keys: 'p' - up, 'l' - down"
+    fullscreen_text = "Press 'f' to toggle fullscreen"
+
     love.graphics.print(player_left_text,
         50, platform.height - 250, 0, 0.5, 0.5)
     love.graphics.print(player_right_text,
         50, platform.height - 200, 0, 0.5, 0.5)
+        love.graphics.print(fullscreen_text,
+        50, platform.height - 150, 0, 0.5, 0.5)
 
     start_text = "Press space to start"
     start_width = font:getWidth(start_text)

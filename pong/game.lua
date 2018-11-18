@@ -3,10 +3,14 @@
 -- Setup functions
 
 function game_load()
+    game_setup()
+    setup_score()
+end
+
+function game_setup()
     setup_bat_left()
     setup_bat_right()
     setup_ball()
-    setup_score()
 end
 
 function setup_ball()
@@ -86,6 +90,82 @@ function draw_game_over()
             platform.height / 2 - win_width / 2)
     end
 end
+
+-- Update functions
+
+function game_update(dt) 
+    -- Move ball
+    ball.x = ball.x + ball.x_velocity * dt
+    ball.y = ball.y + ball.y_velocity * dt
+
+    -- Control left bat
+    if love.keyboard.isDown('a') then
+        if bat_left.y >= platform.height - bat_left.y_size then
+            bat_left.y = platform.height - bat_left.y_size
+        else
+            bat_left.y = bat_left.y + bat_left.velocity * dt
+        end
+    end
+
+    if love.keyboard.isDown('q') then
+        if bat_left.y <= 0 then
+            bat_left.y = 0
+        else
+            bat_left.y = bat_left.y - bat_left.velocity * dt
+        end
+    end
+
+    -- Control right bat
+    if love.keyboard.isDown('l') then
+        if bat_right.y >= platform.height - bat_right.y_size then
+            bat_right.y = platform.height - bat_right.y_size
+        else
+            bat_right.y = bat_right.y + bat_right.velocity * dt
+        end
+    end
+
+    if love.keyboard.isDown('p') then
+        if bat_right.y <= 0 then
+            bat_right.y = 0
+        else
+            bat_right.y = bat_right.y - bat_right.velocity * dt
+        end
+    end
+
+    -- Detect ball collision with left bat
+    if ball.x >= bat_left.x and ball.x <= bat_left.x + bat_left.x_size and
+        ball.y >= bat_left.y and ball.y <= bat_left.y + bat_left.y_size then
+            ball.x_velocity = math.abs(ball.x_velocity)
+    end
+
+    -- Detect ball collision with right bat
+    if ball.x >= bat_right.x and ball.x <= bat_right.x + bat_right.x_size and
+        ball.y >= bat_right.y and ball.y <= bat_right.y + bat_right.y_size then
+            ball.x_velocity = - math.abs(ball.x_velocity)
+    end
+
+    -- Detect left or right wall collision
+    if ball.x >= platform.width - ball.x_size then
+        score.left = score.left + 1
+        reset_ball_right()
+    end
+
+    if ball.x <= 0 then
+        score.right = score.right + 1
+        reset_ball_left()
+    end
+
+    -- Bounce ball on top or bottom
+    if ball.y >= platform.height - ball.y_size then
+        ball.y_velocity = - math.abs(ball.y_velocity)
+    end
+
+    if ball.y <= 0 then
+        ball.y_velocity = math.abs(ball.y_velocity)
+    end
+end
+
+-- Utility functions
 
 -- Resets the ball to the left bat
 function reset_ball_left()
