@@ -1,5 +1,8 @@
 -- Main game screen
 
+local LEFT, RIGHT = 1, 2
+local win = false
+
 -- Setup functions
 
 function game_load()
@@ -52,7 +55,9 @@ function game_draw()
     draw_bat_left()
     draw_bat_right()
     draw_score()
-    draw_game_over()
+    if win then
+        draw_game_over()
+    end
 end
 
 function draw_ball()
@@ -87,16 +92,35 @@ function draw_game_over()
         win_width = font:getWidth(win_text)
         love.graphics.print(win_text,
             platform.width / 2 - win_width / 2,
-            platform.height / 2 - win_width / 2)
+            platform.height / 2)
+
+            continue_text = "Press 'q' to continue"
+            continue_width = font:getWidth(continue_text)
+            love.graphics.print(continue_text,
+                platform.width / 2 - continue_width / 2,
+                platform.height / 2 + 100)
     end
 end
 
 -- Update functions
 
-function game_update(dt) 
-    -- Move ball
-    ball.x = ball.x + ball.x_velocity * dt
-    ball.y = ball.y + ball.y_velocity * dt
+function game_update(dt)
+
+    -- If game is over, return to start screen on any keypress
+    if win then
+        if love.keyboard.isDown('q') then
+            win = false
+            state = START
+        end
+        return
+    end
+
+    -- Only animate ball when a game is in progress
+    if not win then
+        -- Move ball
+        ball.x = ball.x + ball.x_velocity * dt
+        ball.y = ball.y + ball.y_velocity * dt
+    end
 
     -- Control left bat
     if love.keyboard.isDown('a') then
@@ -146,12 +170,14 @@ function game_update(dt)
 
     -- Detect left or right wall collision
     if ball.x >= platform.width - ball.x_size then
-        score.left = score.left + 1
+        -- score.left = score.left + 1
+        score_point(LEFT)
         reset_ball_right()
     end
 
     if ball.x <= 0 then
-        score.right = score.right + 1
+        -- score.right = score.right + 1
+        score_point(RIGHT)
         reset_ball_left()
     end
 
@@ -167,6 +193,18 @@ end
 
 -- Utility functions
 
+-- Scores a point
+function score_point(who)
+    if who == LEFT then
+        score.left = score.left + 1
+    else
+        score.right = score.right + 1
+    end
+    if score.left == 2 or score.right == 2 then
+        win = true
+    end
+end
+
 -- Resets the ball to the left bat
 function reset_ball_left()
     ball.x = bat_left.x + bat_left.x_size
@@ -177,7 +215,7 @@ end
 
 -- Resets the ball to the right side
 function reset_ball_right()
-    ball.x = bat_right.x
+    ball.x = bat_right.x - ball.x_size
     ball.y = bat_left.y + bat_left.y_size / 2
     ball.x_velocity = -VELOCITY
     ball.y_velocity = love.math.random(-VELOCITY, VELOCITY)
