@@ -216,7 +216,7 @@ end
 -- Resets the ball to the right side
 function reset_ball_right()
     ball.x = bat_right.x - ball.x_size
-    ball.y = bat_left.y + bat_left.y_size / 2
+    ball.y = bat_right.y + bat_right.y_size / 2
     ball.x_velocity = -VELOCITY
     ball.y_velocity = love.math.random(-VELOCITY, VELOCITY)
 end
